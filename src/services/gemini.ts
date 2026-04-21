@@ -19,7 +19,7 @@ export interface VariantQuestion {
 export const geminiService = {
   async recognizeQuestion(base64Image: string): Promise<OCRResult> {
     const response = await ai.models.generateContent({
-      model: "gemini-3-flash-preview",
+      model: "gemini-flash-latest",
       contents: [
         {
           inlineData: {
@@ -47,12 +47,16 @@ export const geminiService = {
       },
     });
 
+    if (!response.text) {
+      throw new Error("AI 未返回有效内容");
+    }
+
     return JSON.parse(response.text);
   },
 
   async generateVariants(originalQuestion: string, knowledgePoint: string): Promise<VariantQuestion[]> {
     const response = await ai.models.generateContent({
-      model: "gemini-3.1-pro-preview",
+      model: "gemini-flash-latest",
       contents: `基于知识点“${knowledgePoint}”，针对以下原题生成3道相似的举一反三题目：
       原题：${originalQuestion}
       
@@ -79,6 +83,10 @@ export const geminiService = {
         },
       },
     });
+
+    if (!response.text) {
+      throw new Error("AI 未返回有效内容");
+    }
 
     return JSON.parse(response.text);
   },
